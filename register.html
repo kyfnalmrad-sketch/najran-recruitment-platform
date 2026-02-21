@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}التسجيل - منصة التوظيف{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 600px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h1 style="text-align: center; margin-bottom: 2rem; color: #1f2937;">إنشاء حساب جديد</h1>
+
+        {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('register') }}" id="register-form">
+            <div class="form-group">
+                <label for="user_type">نوع المستخدم</label>
+                <select id="user_type" name="user_type" required onchange="updateFormFields()">
+                    <option value="">اختر نوع المستخدم</option>
+                    <option value="seeker">باحث عن عمل</option>
+                    <option value="company">شركة</option>
+                </select>
+            </div>
+
+            <!-- حقول الباحث عن عمل -->
+            <div id="seeker-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="full_name">الاسم الكامل</label>
+                    <input type="text" id="full_name" name="full_name" placeholder="أدخل اسمك الكامل">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <input type="email" id="email" name="email" placeholder="أدخل بريدك الإلكتروني">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">كلمة المرور</label>
+                    <input type="password" id="password" name="password" placeholder="أدخل كلمة المرور">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">رقم الجوال</label>
+                    <input type="tel" id="phone" name="phone" placeholder="أدخل رقم جوالك">
+                </div>
+
+                <div class="form-group">
+                    <label for="city">المدينة</label>
+                    <input type="text" id="city" name="city" placeholder="أدخل مدينتك">
+                </div>
+            </div>
+
+            <!-- حقول الشركة -->
+            <div id="company-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="company_name">اسم الشركة</label>
+                    <input type="text" id="company_name" name="company_name" placeholder="أدخل اسم الشركة">
+                </div>
+
+                <div class="form-group">
+                    <label for="company_email">البريد الإلكتروني</label>
+                    <input type="email" id="company_email" name="email" placeholder="أدخل البريد الإلكتروني للشركة">
+                </div>
+
+                <div class="form-group">
+                    <label for="company_password">كلمة المرور</label>
+                    <input type="password" id="company_password" name="password" placeholder="أدخل كلمة المرور">
+                </div>
+
+                <div class="form-group">
+                    <label for="company_phone">رقم الهاتف</label>
+                    <input type="tel" id="company_phone" name="phone" placeholder="أدخل رقم هاتف الشركة">
+                </div>
+
+                <div class="form-group">
+                    <label for="company_city">المدينة</label>
+                    <input type="text" id="company_city" name="city" placeholder="أدخل مدينة الشركة">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">نبذة عن الشركة</label>
+                    <textarea id="description" name="description" placeholder="أدخل نبذة عن الشركة"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">تسجيل</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <p style="color: #6b7280;">هل لديك حساب بالفعل؟ <a href="{{ url_for('login') }}" style="color: #2563eb; text-decoration: none; font-weight: bold;">دخول</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateFormFields() {
+    const userType = document.getElementById('user_type').value;
+    const seekerFields = document.getElementById('seeker-fields');
+    const companyFields = document.getElementById('company-fields');
+    
+    if (userType === 'seeker') {
+        seekerFields.style.display = 'block';
+        companyFields.style.display = 'none';
+        // تعيين required للحقول المرئية
+        document.getElementById('full_name').required = true;
+        document.getElementById('email').required = true;
+        document.getElementById('password').required = true;
+        document.getElementById('phone').required = true;
+        document.getElementById('city').required = true;
+        
+        document.getElementById('company_name').required = false;
+        document.getElementById('company_email').required = false;
+        document.getElementById('company_password').required = false;
+        document.getElementById('company_phone').required = false;
+        document.getElementById('company_city').required = false;
+    } else if (userType === 'company') {
+        seekerFields.style.display = 'none';
+        companyFields.style.display = 'block';
+        // تعيين required للحقول المرئية
+        document.getElementById('full_name').required = false;
+        document.getElementById('email').required = false;
+        document.getElementById('password').required = false;
+        document.getElementById('phone').required = false;
+        document.getElementById('city').required = false;
+        
+        document.getElementById('company_name').required = true;
+        document.getElementById('company_email').required = true;
+        document.getElementById('company_password').required = true;
+        document.getElementById('company_phone').required = true;
+        document.getElementById('company_city').required = true;
+    }
+}
+</script>
+{% endblock %}

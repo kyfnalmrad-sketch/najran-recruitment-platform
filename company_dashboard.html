@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة الشركة - منصة التوظيف{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1>{{ session.user_name }}</h1>
+            <p style="color: #6b7280; margin-top: 0.5rem;">لوحة تحكم الشركة</p>
+        </div>
+        <a href="{{ url_for('add_job') }}" class="btn btn-primary">+ إضافة وظيفة جديدة</a>
+    </div>
+
+    <!-- الإحصائيات -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-value">{{ jobs|length }}</div>
+            <div class="stat-label">إجمالي الوظائف</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">
+                {% set total_apps = 0 %}
+                {% for job in jobs %}
+                    {% set total_apps = total_apps + job.applications|length %}
+                {% endfor %}
+                {{ total_apps }}
+            </div>
+            <div class="stat-label">إجمالي الطلبات</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ jobs|selectattr('status', 'equalto', 'Published')|list|length }}</div>
+            <div class="stat-label">وظائف منشورة</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ jobs|selectattr('status', 'equalto', 'Pending')|list|length }}</div>
+            <div class="stat-label">قيد الموافقة</div>
+        </div>
+    </div>
+
+    <!-- جدول الوظائف -->
+    <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h2 style="margin-bottom: 1.5rem; color: #1f2937;">وظائفك</h2>
+
+        {% if jobs %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>المسمى الوظيفي</th>
+                        <th>المدينة</th>
+                        <th>نوع الدوام</th>
+                        <th>الحالة</th>
+                        <th>الطلبات</th>
+                        <th>الإجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                        <tr>
+                            <td>{{ job.title }}</td>
+                            <td>{{ job.city }}</td>
+                            <td>
+                                {% if job.job_type == 'Full-time' %}
+                                    دوام كامل
+                                {% elif job.job_type == 'Part-time' %}
+                                    دوام جزئي
+                                {% else %}
+                                    تدريب
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="job-status status-{{ job.status.lower() }}">{{ job.status }}</span>
+                            </td>
+                            <td>
+                                <span style="font-weight: bold; color: #2563eb;">{{ job.applications|length }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('job_applicants', job_id=job.job_id) }}" class="btn btn-secondary" style="font-size: 0.85rem;">عرض الطلبات</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align: center; padding: 2rem;">
+                <p style="color: #6b7280; margin-bottom: 1rem;">لم تضف أي وظائف حتى الآن</p>
+                <a href="{{ url_for('add_job') }}" class="btn btn-primary">إضافة وظيفة جديدة</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- معلومات الشركة -->
+    <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 2rem;">
+        <h2 style="margin-bottom: 1.5rem; color: #1f2937;">معلومات الشركة</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">اسم الشركة</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ company.company_name }}</p>
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">البريد الإلكتروني</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ company.email }}</p>
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">رقم الهاتف</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ company.phone }}</p>
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">المدينة</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ company.city }}</p>
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">حالة الحساب</p>
+                <p style="margin-top: 0.5rem;">
+                    <span class="job-status status-{{ company.status.lower() }}">{{ company.status }}</span>
+                </p>
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">تاريخ التسجيل</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ company.created_at.strftime('%d-%m-%Y') }}</p>
+            </div>
+        </div>
+
+        {% if company.description %}
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                <p style="color: #6b7280; font-size: 0.9rem;">نبذة عن الشركة</p>
+                <p style="margin-top: 0.5rem; line-height: 1.6;">{{ company.description }}</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

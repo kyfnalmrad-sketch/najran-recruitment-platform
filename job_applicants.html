@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}المتقدمون - منصة التوظيف{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="margin-bottom: 0.5rem;">{{ job.title }}</h1>
+            <p style="color: #6b7280;">{{ applications|length }} متقدم</p>
+        </div>
+        <a href="{{ url_for('company_dashboard') }}" class="btn btn-secondary">← العودة</a>
+    </div>
+
+    {% if applications %}
+        <div style="background: white; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+            {% for app in applications %}
+                <div style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb; {% if loop.last %}border-bottom: none;{% endif %}">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">{{ app.seeker.full_name }}</h3>
+                            <p style="color: #6b7280; font-size: 0.9rem;">{{ app.seeker.email }} | {{ app.seeker.phone }}</p>
+                            <p style="color: #6b7280; font-size: 0.9rem;">📍 {{ app.seeker.city }}</p>
+                        </div>
+                        <span class="job-status status-{{ app.status.lower() }}">
+                            {% if app.status == 'Pending' %}
+                                قيد المراجعة
+                            {% elif app.status == 'Accepted' %}
+                                مقبول
+                            {% else %}
+                                مرفوض
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if app.cover_letter %}
+                        <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                            <p style="font-weight: bold; margin-bottom: 0.5rem;">رسالة التقديم:</p>
+                            <p style="color: #4b5563; line-height: 1.6;">{{ app.cover_letter }}</p>
+                        </div>
+                    {% endif %}
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <p style="color: #6b7280; font-size: 0.9rem;">تاريخ التقديم</p>
+                            <p style="font-weight: bold;">{{ app.applied_at.strftime('%d-%m-%Y %H:%M') }}</p>
+                        </div>
+                        {% if app.cv_filename %}
+                            <div>
+                                <p style="color: #6b7280; font-size: 0.9rem;">السيرة الذاتية</p>
+                                <a href="{{ url_for('download_cv', filename=app.cv_filename) }}" class="btn btn-secondary" style="font-size: 0.85rem; display: inline-block;">📥 تحميل CV</a>
+                            </div>
+                        {% else %}
+                            <div>
+                                <p style="color: #6b7280; font-size: 0.9rem;">السيرة الذاتية</p>
+                                <p style="color: #ef4444; font-size: 0.85rem;">لم يتم رفع ملف</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if app.internal_notes %}
+                        <div style="background: #fef3c7; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border-right: 4px solid #f59e0b;">
+                            <p style="font-weight: bold; margin-bottom: 0.5rem;">ملاحظات داخلية:</p>
+                            <p style="color: #92400e;">{{ app.internal_notes }}</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- تحديث الحالة -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="notes-{{ app.application_id }}" style="font-size: 0.9rem;">ملاحظات</label>
+                            <textarea id="notes-{{ app.application_id }}" placeholder="أضف ملاحظات..." style="min-height: 80px;"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                            <button onclick="updateApplicationStatus({{ app.application_id }}, 'Accepted')" class="btn btn-success" style="flex: 1;">✓ قبول</button>
+                            <button onclick="updateApplicationStatus({{ app.application_id }}, 'Rejected')" class="btn btn-danger" style="flex: 1;">✗ رفض</button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="background: white; padding: 3rem; border-radius: 0.75rem; text-align: center;">
+            <p style="color: #6b7280; font-size: 1.1rem;">لا توجد طلبات على هذه الوظيفة حتى الآن</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

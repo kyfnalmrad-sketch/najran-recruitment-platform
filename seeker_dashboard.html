@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة التحكم - منصة التوظيف{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1>مرحباً {{ session.user_name }}</h1>
+            <p style="color: #6b7280; margin-top: 0.5rem;">لوحة التحكم الخاصة بك</p>
+        </div>
+    </div>
+
+    <!-- الإحصائيات -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-value">{{ applications|length }}</div>
+            <div class="stat-label">إجمالي الطلبات</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ applications|selectattr('status', 'equalto', 'Pending')|list|length }}</div>
+            <div class="stat-label">قيد المراجعة</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ applications|selectattr('status', 'equalto', 'Accepted')|list|length }}</div>
+            <div class="stat-label">مقبول</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ applications|selectattr('status', 'equalto', 'Rejected')|list|length }}</div>
+            <div class="stat-label">مرفوض</div>
+        </div>
+    </div>
+
+    <!-- جدول الطلبات -->
+    <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h2 style="margin-bottom: 1.5rem; color: #1f2937;">طلباتك</h2>
+
+        {% if applications %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>الوظيفة</th>
+                        <th>الشركة</th>
+                        <th>تاريخ التقديم</th>
+                        <th>الحالة</th>
+                        <th>الإجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                        <tr>
+                            <td>{{ app.job.title }}</td>
+                            <td>{{ app.job.company.company_name }}</td>
+                            <td>{{ app.applied_at.strftime('%d-%m-%Y') }}</td>
+                            <td>
+                                <span class="job-status status-{{ app.status.lower() }}">
+                                    {% if app.status == 'Pending' %}
+                                        قيد المراجعة
+                                    {% elif app.status == 'Accepted' %}
+                                        مقبول
+                                    {% else %}
+                                        مرفوض
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('job_detail', job_id=app.job_id) }}" class="btn btn-secondary" style="font-size: 0.85rem;">عرض</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align: center; padding: 2rem;">
+                <p style="color: #6b7280; margin-bottom: 1rem;">لم تقدم على أي وظيفة حتى الآن</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">ابحث عن وظائف</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- معلومات الحساب -->
+    <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 2rem;">
+        <h2 style="margin-bottom: 1.5rem; color: #1f2937;">معلومات الحساب</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">الاسم الكامل</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ seeker.full_name }}</p>
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">البريد الإلكتروني</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ seeker.email }}</p>
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">رقم الجوال</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ seeker.phone }}</p>
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">المدينة</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ seeker.city }}</p>
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 0.9rem;">تاريخ التسجيل</p>
+                <p style="font-weight: bold; margin-top: 0.5rem;">{{ seeker.created_at.strftime('%d-%m-%Y') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

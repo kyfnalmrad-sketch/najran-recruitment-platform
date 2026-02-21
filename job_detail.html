@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} - منصة التوظيف{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 800px; margin: 2rem auto;">
+        <!-- رأس الوظيفة -->
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div>
+                    <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">{{ job.title }}</h1>
+                    <p style="color: #2563eb; font-size: 1.1rem; font-weight: bold;">{{ job.company.company_name }}</p>
+                </div>
+                <span class="job-status status-{{ job.status.lower() }}">{{ job.status }}</span>
+            </div>
+
+            <div class="job-meta" style="margin-bottom: 1.5rem;">
+                <div class="meta-item">
+                    <span class="meta-icon">📍</span>
+                    <span>{{ job.city }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-icon">⏰</span>
+                    <span>
+                        {% if job.job_type == 'Full-time' %}
+                            دوام كامل
+                        {% elif job.job_type == 'Part-time' %}
+                            دوام جزئي
+                        {% else %}
+                            تدريب
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-icon">🏷️</span>
+                    <span>{{ job.category_name }}</span>
+                </div>
+                {% if job.salary %}
+                    <div class="meta-item">
+                        <span class="meta-icon">💰</span>
+                        <span>{{ job.salary }}</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                <p style="color: #6b7280; font-size: 0.9rem;">تاريخ النشر: {{ job.posted_at.strftime('%d-%m-%Y') }}</p>
+            </div>
+        </div>
+
+        <!-- تفاصيل الوظيفة -->
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1rem; color: #1f2937;">وصف الوظيفة</h2>
+            <p style="line-height: 1.8; color: #4b5563; white-space: pre-wrap;">{{ job.description }}</p>
+        </div>
+
+        <!-- المتطلبات -->
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1rem; color: #1f2937;">المتطلبات</h2>
+            <p style="line-height: 1.8; color: #4b5563; white-space: pre-wrap;">{{ job.requirements }}</p>
+        </div>
+
+        <!-- معلومات الشركة -->
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1rem; color: #1f2937;">عن الشركة</h2>
+            <p style="font-weight: bold; margin-bottom: 0.5rem;">{{ job.company.company_name }}</p>
+            <p style="color: #6b7280; margin-bottom: 1rem;">{{ job.company.description or 'لا توجد معلومات إضافية' }}</p>
+            <p style="color: #6b7280;">📍 {{ job.company.city }} | 📞 {{ job.company.phone }}</p>
+        </div>
+
+        <!-- نموذج التقديم -->
+        {% if session.get('user_type') == 'seeker' %}
+            <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h2 style="margin-bottom: 1rem; color: #1f2937;">تقديم الطلب</h2>
+                
+                <form id="application-form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="cover-letter">رسالة التقديم *</label>
+                        <textarea id="cover-letter" name="cover_letter" placeholder="اكتب رسالة التقديم الخاصة بك..." required style="min-height: 150px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cv-file">السيرة الذاتية (PDF, DOC, DOCX) *</label>
+                        <input type="file" id="cv-file" name="cv_file" accept=".pdf,.doc,.docx" required>
+                        <small style="color: #6b7280; display: block; margin-top: 0.5rem;">الحد الأقصى للملف: 16 ميجابايت</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">تقديم الطلب</button>
+                </form>
+            </div>
+
+            <script>
+            document.getElementById('application-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                fetch('{{ url_for("apply_job", job_id=job.job_id) }}', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('تم تقديم الطلب بنجاح', 'success');
+                        setTimeout(() => {
+                            window.location.href = '{{ url_for("seeker_dashboard") }}';
+                        }, 2000);
+                    } else {
+                        showAlert(data.message || 'حدث خطأ في التقديم', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('خطأ:', error);
+                    showAlert('حدث خطأ في الاتصال بالخادم', 'error');
+                });
+            });
+            </script>
+        {% elif not session.get('user_type') %}
+            <div class="alert alert-info">
+                <p style="margin-bottom: 0.5rem;"><strong>هل تريد التقديم على هذه الوظيفة؟</strong></p>
+                <p>يجب عليك <a href="{{ url_for('login') }}" style="color: #0c4a6e; text-decoration: underline;">تسجيل الدخول</a> أو <a href="{{ url_for('register') }}" style="color: #0c4a6e; text-decoration: underline;">إنشاء حساب جديد</a> أولاً.</p>
+            </div>
+        {% elif session.get('user_type') != 'seeker' %}
+            <div class="alert alert-warning">
+                <p>يمكن فقط الباحثين عن عمل التقديم على الوظائف.</p>
+            </div>
+        {% endif %}
+
+        <!-- زر العودة -->
+        <div style="margin-top: 2rem;">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">← العودة للوظائف</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}الرئيسية - منصة توظيف نجران{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- قسم البحث والتصفية -->
+    <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.05) 100%); padding: 2.5rem; border-radius: 1.5rem; margin-bottom: 3rem; border: 1px solid rgba(37, 99, 235, 0.1);">
+        <h2 style="margin-bottom: 1.5rem; color: #1e293b; font-size: 1.75rem; font-weight: 700;">🔍 ابحث عن وظيفة أحلامك</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <select id="city-filter">
+                    <option value="">📍 كل المدن</option>
+                    {% for city in cities %}
+                        <option value="{{ city[0] }}">{{ city[0] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <select id="category-filter">
+                    <option value="">🏷️ كل التصنيفات</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat[0] }}">{{ cat[0] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <select id="type-filter">
+                    <option value="">⏰ نوع الدوام</option>
+                    <option value="Full-time">دوام كامل</option>
+                    <option value="Part-time">دوام جزئي</option>
+                    <option value="Internship">تدريب</option>
+                </select>
+            </div>
+            <button onclick="searchJobs()" class="btn btn-primary" style="width: 100%;">🔎 بحث</button>
+        </div>
+    </div>
+
+    <!-- العنوان -->
+    <h2 style="margin-bottom: 2rem; color: #1e293b; font-size: 1.75rem; font-weight: 700;">
+        ✨ أحدث الوظائف المتاحة
+        <span style="color: #64748b; font-size: 1rem; font-weight: 400;">
+            {% if jobs.total %}({{ jobs.total }} وظيفة){% endif %}
+        </span>
+    </h2>
+    
+    {% if jobs.items %}
+        <div class="jobs-grid">
+            {% for job in jobs.items %}
+                <a href="{{ url_for('job_detail', job_id=job.job_id) }}" class="job-card fade-in">
+                    <!-- رأس البطاقة -->
+                    <div class="job-header">
+                        <div style="flex: 1;">
+                            <h3 class="job-title">{{ job.title }}</h3>
+                            <p class="company-name">{{ job.company.company_name }}</p>
+                        </div>
+                        <div class="company-logo">🏢</div>
+                    </div>
+
+                    <!-- التاغات الملونة -->
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <span class="job-type-tag 
+                            {% if job.job_type == 'Full-time' %}tag-fulltime
+                            {% elif job.job_type == 'Part-time' %}tag-parttime
+                            {% elif job.job_type == 'Internship' %}tag-internship
+                            {% else %}tag-remote{% endif %}">
+                            {% if job.job_type == 'Full-time' %}دوام كامل
+                            {% elif job.job_type == 'Part-time' %}دوام جزئي
+                            {% else %}تدريب{% endif %}
+                        </span>
+                    </div>
+
+                    <!-- بيانات الوظيفة -->
+                    <div class="job-meta">
+                        <div class="meta-item">📍 {{ job.city }}</div>
+                        <div class="meta-item">🏷️ {{ job.category_name }}</div>
+                    </div>
+
+                    <!-- الوصف -->
+                    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5;">
+                        {{ job.description }}
+                    </p>
+
+                    <!-- الراتب -->
+                    <div class="job-salary">
+                        {% if job.salary %}
+                            💰 {{ job.salary }}
+                        {% else %}
+                            💰 يحدد بعد المقابلة
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+
+        <!-- الترقيم -->
+        {% if jobs.pages > 1 %}
+            <div style="display: flex; justify-content: center; gap: 0.75rem; margin-top: 3rem; flex-wrap: wrap;">
+                {% for page_num in jobs.iter_pages() %}
+                    {% if page_num %}
+                        <a href="{{ url_for('index', page=page_num) }}" class="btn {% if page_num == jobs.page %}btn-primary{% else %}btn-secondary{% endif %}" style="padding: 0.5rem 1rem; border-radius: 0.75rem;">
+                            {{ page_num }}
+                        </a>
+                    {% else %}
+                        <span style="padding: 0.5rem; color: #94a3b8;">...</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- حالة عدم وجود وظائف -->
+        <div style="background: white; padding: 4rem 2rem; border-radius: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0;">
+            <p style="color: #64748b; font-size: 1.2rem; margin-bottom: 1rem;">😔 لا توجد وظائف متاحة حالياً تطابق بحثك.</p>
+            <p style="color: #94a3b8; margin-bottom: 1.5rem;">يرجى محاولة البحث بمعايير مختلفة أو العودة لاحقاً.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">🔄 عرض كل الوظائف</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

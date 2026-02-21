@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة وظيفة جديدة - منصة التوظيف{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 700px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h1 style="margin-bottom: 2rem; color: #1f2937;">إضافة وظيفة جديدة</h1>
+
+        <form method="POST" action="{{ url_for('add_job') }}">
+            <div class="form-group">
+                <label for="title">المسمى الوظيفي *</label>
+                <input type="text" id="title" name="title" required placeholder="مثال: مهندس برمجيات">
+            </div>
+
+            <div class="form-group">
+                <label for="category_name">التصنيف *</label>
+                <select id="category_name" name="category_name" required>
+                    <option value="">اختر التصنيف</option>
+                    <option value="IT">تقنية المعلومات</option>
+                    <option value="Accounting">المحاسبة</option>
+                    <option value="HR">الموارد البشرية</option>
+                    <option value="Sales">المبيعات</option>
+                    <option value="Marketing">التسويق</option>
+                    <option value="Design">التصميم</option>
+                    <option value="Other">أخرى</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description">وصف الوظيفة *</label>
+                <textarea id="description" name="description" required placeholder="اكتب وصفاً تفصيلياً للوظيفة..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="requirements">المتطلبات *</label>
+                <textarea id="requirements" name="requirements" required placeholder="اكتب المتطلبات والمهارات المطلوبة..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="city">المدينة *</label>
+                <input type="text" id="city" name="city" required placeholder="مثال: الرياض">
+            </div>
+
+            <div class="form-group">
+                <label for="job_type">نوع الدوام *</label>
+                <select id="job_type" name="job_type" required>
+                    <option value="">اختر نوع الدوام</option>
+                    <option value="Full-time">دوام كامل</option>
+                    <option value="Part-time">دوام جزئي</option>
+                    <option value="Internship">تدريب</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="salary">الراتب (اختياري)</label>
+                <input type="text" id="salary" name="salary" placeholder="مثال: 5000 - 8000 ريال">
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">نشر الوظيفة</button>
+                <a href="{{ url_for('company_dashboard') }}" class="btn btn-secondary" style="flex: 1; text-align: center;">إلغاء</a>
+            </div>
+
+            <p style="color: #6b7280; font-size: 0.9rem; margin-top: 1rem; text-align: center;">
+                ملاحظة: ستكون الوظيفة قيد المراجعة من قبل المشرف قبل نشرها
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}

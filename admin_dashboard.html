@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة المشرف - منصة التوظيف{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1>لوحة المشرف</h1>
+            <p style="color: #6b7280; margin-top: 0.5rem;">إدارة النظام والموافقات</p>
+        </div>
+    </div>
+
+    <!-- الإحصائيات -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-value">{{ companies|length }}</div>
+            <div class="stat-label">الشركات</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ companies|selectattr('status', 'equalto', 'Pending')|list|length }}</div>
+            <div class="stat-label">شركات قيد المراجعة</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ jobs|length }}</div>
+            <div class="stat-label">الوظائف</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ seekers|length }}</div>
+            <div class="stat-label">الباحثون</div>
+        </div>
+    </div>
+
+    <!-- تبويبات الإدارة -->
+    <div style="margin-top: 2rem;">
+        <!-- إدارة الشركات -->
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1.5rem; color: #1f2937;">إدارة الشركات</h2>
+
+            {% if companies %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم الشركة</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>المدينة</th>
+                            <th>الحالة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for company in companies %}
+                            <tr>
+                                <td>{{ company.company_name }}</td>
+                                <td>{{ company.email }}</td>
+                                <td>{{ company.city }}</td>
+                                <td>
+                                    <span class="job-status status-{{ company.status.lower() }}">{{ company.status }}</span>
+                                </td>
+                                <td>
+                                    {% if company.status == 'Pending' %}
+                                        <button onclick="updateCompanyStatus({{ company.company_id }}, 'Approved')" class="btn btn-success" style="font-size: 0.85rem;">موافقة</button>
+                                        <button onclick="updateCompanyStatus({{ company.company_id }}, 'Rejected')" class="btn btn-danger" style="font-size: 0.85rem;">رفض</button>
+                                    {% else %}
+                                        <span style="color: #6b7280; font-size: 0.9rem;">معتمدة</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="color: #6b7280; text-align: center; padding: 2rem;">لا توجد شركات</p>
+            {% endif %}
+        </div>
+
+        <!-- إدارة الوظائف -->
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1.5rem; color: #1f2937;">إدارة الوظائف</h2>
+
+            {% if jobs %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المسمى الوظيفي</th>
+                            <th>الشركة</th>
+                            <th>المدينة</th>
+                            <th>الحالة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in jobs %}
+                            <tr>
+                                <td>{{ job.title }}</td>
+                                <td>{{ job.company.company_name }}</td>
+                                <td>{{ job.city }}</td>
+                                <td>
+                                    <span class="job-status status-{{ job.status.lower() }}">{{ job.status }}</span>
+                                </td>
+                                <td>
+                                    {% if job.status == 'Pending' %}
+                                        <button onclick="updateJobStatus({{ job.job_id }}, 'Published')" class="btn btn-success" style="font-size: 0.85rem;">نشر</button>
+                                        <button onclick="updateJobStatus({{ job.job_id }}, 'Rejected')" class="btn btn-danger" style="font-size: 0.85rem;">رفض</button>
+                                    {% elif job.status == 'Published' %}
+                                        <button onclick="updateJobStatus({{ job.job_id }}, 'Hidden')" class="btn btn-warning" style="font-size: 0.85rem;">إخفاء</button>
+                                    {% else %}
+                                        <span style="color: #6b7280; font-size: 0.9rem;">{{ job.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="color: #6b7280; text-align: center; padding: 2rem;">لا توجد وظائف</p>
+            {% endif %}
+        </div>
+
+        <!-- إحصائيات الباحثين -->
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 1.5rem; color: #1f2937;">الباحثون عن عمل</h2>
+
+            {% if seekers %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>الجوال</th>
+                            <th>المدينة</th>
+                            <th>تاريخ التسجيل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for seeker in seekers %}
+                            <tr>
+                                <td>{{ seeker.full_name }}</td>
+                                <td>{{ seeker.email }}</td>
+                                <td>{{ seeker.phone }}</td>
+                                <td>{{ seeker.city }}</td>
+                                <td>{{ seeker.created_at.strftime('%d-%m-%Y') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="color: #6b7280; text-align: center; padding: 2rem;">لا يوجد باحثون</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
